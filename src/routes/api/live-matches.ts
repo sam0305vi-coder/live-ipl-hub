@@ -15,7 +15,7 @@ async function cb(path: string) {
 export const Route = createFileRoute("/api/live-matches")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async (_ctx: any) => {
         try {
           const data = await cb("/matches/v1/live");
           // Normalize to a flat list

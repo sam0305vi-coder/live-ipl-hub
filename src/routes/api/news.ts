@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/api/news")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async (_ctx: any) => {
         const key = process.env.GNEWS_API_KEY;
         if (!key) {
           return Response.json({ news: [], error: "GNEWS_API_KEY not configured" });

@@ -14,7 +14,7 @@ async function cb(path: string) {
 export const Route = createFileRoute("/api/live/$id")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
+      GET: async ({ params }: any) => {
         try {
           const data = await cb(`/mcenter/v1/${params.id}/leanback`);
           const mh = data.miniscore ?? {};

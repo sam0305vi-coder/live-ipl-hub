@@ -25,7 +25,7 @@ function ballSymbol(c: any): string {
 export const Route = createFileRoute("/api/commentary/$id")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
+      GET: async ({ params }: any) => {
         try {
           const data = await cb(`/mcenter/v1/${params.id}/comm`);
           const list: any[] = data.commentaryList ?? [];

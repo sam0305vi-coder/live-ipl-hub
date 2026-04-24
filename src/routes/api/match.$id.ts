@@ -14,7 +14,7 @@ async function cb(path: string) {
 export const Route = createFileRoute("/api/match/$id")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
+      GET: async ({ params }: any) => {
         try {
           // Fetch info + scorecard in parallel
           const [info, scard] = await Promise.all([
