@@ -66,6 +66,7 @@ export interface LiveData {
   recentBalls: string[];
   thisOver: string[];
   partnership: { runs: number; balls: number };
+  overSummary?: { over: number; runs: number; wickets: number }[];
 }
 
 export interface Commentary {
