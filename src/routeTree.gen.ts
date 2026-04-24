@@ -19,6 +19,11 @@ import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TeamTeamIdRouteImport } from './routes/team.$teamId'
 import { Route as LiveMatchIdRouteImport } from './routes/live.$matchId'
+import { Route as ApiNewsRouteImport } from './routes/api/news'
+import { Route as ApiLiveMatchesRouteImport } from './routes/api/live-matches'
+import { Route as ApiMatchIdRouteImport } from './routes/api/match.$id'
+import { Route as ApiLiveIdRouteImport } from './routes/api/live.$id'
+import { Route as ApiCommentaryIdRouteImport } from './routes/api/commentary.$id'
 
 const VideosRoute = VideosRouteImport.update({
   id: '/videos',
@@ -70,6 +75,31 @@ const LiveMatchIdRoute = LiveMatchIdRouteImport.update({
   path: '/live/$matchId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiNewsRoute = ApiNewsRouteImport.update({
+  id: '/api/news',
+  path: '/api/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLiveMatchesRoute = ApiLiveMatchesRouteImport.update({
+  id: '/api/live-matches',
+  path: '/api/live-matches',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMatchIdRoute = ApiMatchIdRouteImport.update({
+  id: '/api/match/$id',
+  path: '/api/match/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLiveIdRoute = ApiLiveIdRouteImport.update({
+  id: '/api/live/$id',
+  path: '/api/live/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCommentaryIdRoute = ApiCommentaryIdRouteImport.update({
+  id: '/api/commentary/$id',
+  path: '/api/commentary/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -80,8 +110,13 @@ export interface FileRoutesByFullPath {
   '/stats': typeof StatsRoute
   '/teams': typeof TeamsRoute
   '/videos': typeof VideosRoute
+  '/api/live-matches': typeof ApiLiveMatchesRoute
+  '/api/news': typeof ApiNewsRoute
   '/live/$matchId': typeof LiveMatchIdRoute
   '/team/$teamId': typeof TeamTeamIdRoute
+  '/api/commentary/$id': typeof ApiCommentaryIdRoute
+  '/api/live/$id': typeof ApiLiveIdRoute
+  '/api/match/$id': typeof ApiMatchIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -92,8 +127,13 @@ export interface FileRoutesByTo {
   '/stats': typeof StatsRoute
   '/teams': typeof TeamsRoute
   '/videos': typeof VideosRoute
+  '/api/live-matches': typeof ApiLiveMatchesRoute
+  '/api/news': typeof ApiNewsRoute
   '/live/$matchId': typeof LiveMatchIdRoute
   '/team/$teamId': typeof TeamTeamIdRoute
+  '/api/commentary/$id': typeof ApiCommentaryIdRoute
+  '/api/live/$id': typeof ApiLiveIdRoute
+  '/api/match/$id': typeof ApiMatchIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -105,8 +145,13 @@ export interface FileRoutesById {
   '/stats': typeof StatsRoute
   '/teams': typeof TeamsRoute
   '/videos': typeof VideosRoute
+  '/api/live-matches': typeof ApiLiveMatchesRoute
+  '/api/news': typeof ApiNewsRoute
   '/live/$matchId': typeof LiveMatchIdRoute
   '/team/$teamId': typeof TeamTeamIdRoute
+  '/api/commentary/$id': typeof ApiCommentaryIdRoute
+  '/api/live/$id': typeof ApiLiveIdRoute
+  '/api/match/$id': typeof ApiMatchIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -119,8 +164,13 @@ export interface FileRouteTypes {
     | '/stats'
     | '/teams'
     | '/videos'
+    | '/api/live-matches'
+    | '/api/news'
     | '/live/$matchId'
     | '/team/$teamId'
+    | '/api/commentary/$id'
+    | '/api/live/$id'
+    | '/api/match/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -131,8 +181,13 @@ export interface FileRouteTypes {
     | '/stats'
     | '/teams'
     | '/videos'
+    | '/api/live-matches'
+    | '/api/news'
     | '/live/$matchId'
     | '/team/$teamId'
+    | '/api/commentary/$id'
+    | '/api/live/$id'
+    | '/api/match/$id'
   id:
     | '__root__'
     | '/'
@@ -143,8 +198,13 @@ export interface FileRouteTypes {
     | '/stats'
     | '/teams'
     | '/videos'
+    | '/api/live-matches'
+    | '/api/news'
     | '/live/$matchId'
     | '/team/$teamId'
+    | '/api/commentary/$id'
+    | '/api/live/$id'
+    | '/api/match/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -156,8 +216,13 @@ export interface RootRouteChildren {
   StatsRoute: typeof StatsRoute
   TeamsRoute: typeof TeamsRoute
   VideosRoute: typeof VideosRoute
+  ApiLiveMatchesRoute: typeof ApiLiveMatchesRoute
+  ApiNewsRoute: typeof ApiNewsRoute
   LiveMatchIdRoute: typeof LiveMatchIdRoute
   TeamTeamIdRoute: typeof TeamTeamIdRoute
+  ApiCommentaryIdRoute: typeof ApiCommentaryIdRoute
+  ApiLiveIdRoute: typeof ApiLiveIdRoute
+  ApiMatchIdRoute: typeof ApiMatchIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -232,6 +297,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LiveMatchIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/news': {
+      id: '/api/news'
+      path: '/api/news'
+      fullPath: '/api/news'
+      preLoaderRoute: typeof ApiNewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/live-matches': {
+      id: '/api/live-matches'
+      path: '/api/live-matches'
+      fullPath: '/api/live-matches'
+      preLoaderRoute: typeof ApiLiveMatchesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/match/$id': {
+      id: '/api/match/$id'
+      path: '/api/match/$id'
+      fullPath: '/api/match/$id'
+      preLoaderRoute: typeof ApiMatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/live/$id': {
+      id: '/api/live/$id'
+      path: '/api/live/$id'
+      fullPath: '/api/live/$id'
+      preLoaderRoute: typeof ApiLiveIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/commentary/$id': {
+      id: '/api/commentary/$id'
+      path: '/api/commentary/$id'
+      fullPath: '/api/commentary/$id'
+      preLoaderRoute: typeof ApiCommentaryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -244,8 +344,13 @@ const rootRouteChildren: RootRouteChildren = {
   StatsRoute: StatsRoute,
   TeamsRoute: TeamsRoute,
   VideosRoute: VideosRoute,
+  ApiLiveMatchesRoute: ApiLiveMatchesRoute,
+  ApiNewsRoute: ApiNewsRoute,
   LiveMatchIdRoute: LiveMatchIdRoute,
   TeamTeamIdRoute: TeamTeamIdRoute,
+  ApiCommentaryIdRoute: ApiCommentaryIdRoute,
+  ApiLiveIdRoute: ApiLiveIdRoute,
+  ApiMatchIdRoute: ApiMatchIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
