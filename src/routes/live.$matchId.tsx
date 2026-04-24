@@ -32,7 +32,44 @@ function ballColor(b: string) {
   if (b === "6") return "bg-destructive";
   if (b === "Wd" || b === "Nb" || b === "1b") return "bg-amber-500";
   if (b === ".") return "bg-muted text-muted-foreground";
+  if (b === "W") return "bg-red-700";
   return "bg-emerald-600";
+}
+
+// Compute win probability + momentum from recent over data.
+// Heuristic: chasing-team prob = clamp(50 + (currentRR - requiredRR)*8 - wicketsLost*4 + momentumBonus)
+function computeMatchPulse(live: any) {
+  const overs = parseFloat(live.score.overs) || 0;
+  const runs = live.score.runs || 0;
+  const wkts = live.score.wickets || 0;
+  const currentRR = overs > 0 ? runs / overs : 0;
+  const recentOvs: { over: number; runs: number; wickets: number }[] = live.overSummary?.slice(-5) ?? [];
+  const recentRuns = recentOvs.reduce((a, o) => a + o.runs, 0);
+  const recentWkts = recentOvs.reduce((a, o) => a + o.wickets, 0);
+  const recentRR = recentOvs.length ? recentRuns / recentOvs.length : currentRR;
+
+  let battingProb = 50;
+  let label = "Even contest";
+  if (live.target) {
+    const ballsLeft = Math.max(1, (20 - overs) * 6);
+    const runsNeeded = Math.max(0, live.target - runs);
+    const requiredRR = (runsNeeded / ballsLeft) * 6;
+    battingProb = 50 + (recentRR - requiredRR) * 7 - wkts * 3 - recentWkts * 4;
+    if (runsNeeded <= 0) battingProb = 99;
+    label = battingProb > 65 ? `${live.battingTeam} favourites` : battingProb < 35 ? `${live.bowlingTeam} ahead` : "On a knife's edge";
+  } else {
+    // 1st innings — momentum proxy
+    battingProb = 50 + (recentRR - currentRR) * 6 - recentWkts * 5;
+    label = recentRR > currentRR + 1 ? "Batting team building" : recentWkts >= 2 ? "Bowlers fighting back" : "Steady phase";
+  }
+  battingProb = Math.max(2, Math.min(98, battingProb));
+
+  // Momentum: net runs swing in last 5 overs vs match average
+  const avgPerOver = overs > 0 ? runs / overs : 0;
+  const momentumDelta = recentRR - avgPerOver - recentWkts * 1.5;
+  const momentumPct = Math.max(-100, Math.min(100, momentumDelta * 25));
+
+  return { battingProb, bowlingProb: 100 - battingProb, label, momentumPct, recentOvs };
 }
 
 function LivePage() {
@@ -152,6 +189,58 @@ function LivePage() {
 
         {/* Sidebar */}
         <aside className="space-y-4">
+          {/* Win probability + momentum */}
+          {(() => {
+            const pulse = computeMatchPulse(live);
+            return (
+              <div className="rounded-2xl border border-border/60 gradient-card p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-semibold">Win Probability</h4>
+                  <span className="text-[10px] text-muted-foreground">live model</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-semibold mb-2">
+                  <span>{live.battingTeam || "Bat"}</span>
+                  <span>{live.bowlingTeam || "Bowl"}</span>
+                </div>
+                <div className="relative h-3 w-full rounded-full bg-muted overflow-hidden">
+                  <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700" style={{ width: `${pulse.battingProb}%` }} />
+                </div>
+                <div className="flex justify-between text-[11px] text-muted-foreground mt-1.5">
+                  <span>{pulse.battingProb.toFixed(0)}%</span>
+                  <span>{pulse.bowlingProb.toFixed(0)}%</span>
+                </div>
+                <div className="mt-3 text-center text-xs font-semibold text-primary">{pulse.label}</div>
+
+                <div className="mt-4 pt-4 border-t border-border/60">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold">Momentum</span>
+                    <span className={`text-[10px] font-bold ${pulse.momentumPct > 10 ? "text-emerald-500" : pulse.momentumPct < -10 ? "text-destructive" : "text-muted-foreground"}`}>
+                      {pulse.momentumPct > 10 ? "▲ Batting" : pulse.momentumPct < -10 ? "▼ Bowling" : "— Neutral"}
+                    </span>
+                  </div>
+                  <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
+                    <div className="absolute top-0 bottom-0 left-1/2 w-px bg-border" />
+                    <div
+                      className={`absolute inset-y-0 ${pulse.momentumPct >= 0 ? "left-1/2 bg-emerald-500" : "right-1/2 bg-destructive"} transition-all duration-700`}
+                      style={{ width: `${Math.abs(pulse.momentumPct) / 2}%` }}
+                    />
+                  </div>
+                  {pulse.recentOvs.length > 0 && (
+                    <div className="mt-3 flex gap-1 items-end h-10">
+                      {pulse.recentOvs.map((o, i) => (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                          <div className="w-full bg-primary/60 rounded-sm transition-all" style={{ height: `${Math.min(100, (o.runs / 20) * 100)}%` }} title={`Over ${o.over}: ${o.runs} runs, ${o.wickets}w`} />
+                          {o.wickets > 0 && <span className="text-[8px] text-destructive font-bold">{o.wickets}W</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="mt-1 text-center text-[10px] text-muted-foreground">Last {pulse.recentOvs.length || 5} overs</div>
+                </div>
+              </div>
+            );
+          })()}
+
           <div className="rounded-2xl border border-border/60 gradient-card p-5">
             <h4 className="font-semibold mb-3 flex items-center justify-between">Recent Balls <span className="text-[10px] text-muted-foreground font-normal">auto-updating</span></h4>
             <div className="flex gap-1.5 flex-wrap">

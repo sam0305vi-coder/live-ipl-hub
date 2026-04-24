@@ -1,8 +1,9 @@
-// API service layer. Mock data simulates real endpoints.
-// Swap MOCK_MODE=false and set baseURL to plug in real APIs (RapidAPI cricket, etc.)
+// API service layer.
+// Live data (matches/live/commentary/news) -> backend proxy -> RapidAPI Cricbuzz + GNews.
+// Static data (teams/players details) stays mocked since Cricbuzz IDs differ from our slugs.
 import axios from "axios";
 
-const MOCK_MODE = true;
+const USE_LIVE_API = true; // backend proxy on /api/* (server-side key)
 export const api = axios.create({ baseURL: "/api" });
 
 // ---------- Types ----------
@@ -65,6 +66,7 @@ export interface LiveData {
   recentBalls: string[];
   thisOver: string[];
   partnership: { runs: number; balls: number };
+  overSummary?: { over: number; runs: number; wickets: number }[];
 }
 
 export interface Commentary {
@@ -211,83 +213,120 @@ const VIDEOS: VideoItem[] = [
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // ---------- API Functions ----------
+// Teams & players: keep static (Cricbuzz uses different IDs/slugs)
 export async function getTeams(): Promise<Team[]> {
-  if (MOCK_MODE) { await delay(150); return TEAMS; }
-  return (await api.get("/teams")).data;
+  await delay(100);
+  return TEAMS;
 }
 
 export async function getTeamById(teamId: string): Promise<Team | undefined> {
-  if (MOCK_MODE) { await delay(150); return TEAMS.find((t) => t.id === teamId); }
-  return (await api.get(`/teams/${teamId}`)).data;
-}
-
-export async function getMatches(): Promise<Match[]> {
-  if (MOCK_MODE) { await delay(150); return MATCHES; }
-  return (await api.get("/matches")).data;
-}
-
-export async function getMatchById(matchId: string): Promise<Match | undefined> {
-  if (MOCK_MODE) { await delay(100); return MATCHES.find((m) => m.id === matchId); }
-  return (await api.get(`/matches/${matchId}`)).data;
-}
-
-// Live data with simulated tick — runs/balls increment slightly each call.
-let _tick = 0;
-export async function getLiveMatch(matchId: string): Promise<LiveData> {
-  if (MOCK_MODE) {
-    await delay(200);
-    _tick = (_tick + 1) % 6;
-    const baseRuns = 162 + Math.floor(_tick / 2);
-    const ballsExtra = _tick;
-    const recentBallPool = ["1", "Wd", "1", "4", ".", "1", "1b", "2", ".", "4", "6", "0"];
-    return {
-      matchId,
-      battingTeam: "RCB",
-      bowlingTeam: "CSK",
-      score: { runs: baseRuns, wickets: 4, overs: `18.${3 + ballsExtra > 5 ? 5 : 3 + ballsExtra}` },
-      target: 159,
-      required: `RCB need ${Math.max(0, 17 - _tick)} runs in ${Math.max(1, 9 - ballsExtra)} balls`,
-      currentBatters: [
-        { name: "V. Kohli", runs: 67 + _tick, balls: 43 + ballsExtra, sr: 155.81, onStrike: true },
-        { name: "F. du Plessis", runs: 45, balls: 28, sr: 160.71, onStrike: false },
-      ],
-      currentBowler: { name: "M. Pathirana", overs: `3.${3 + ballsExtra > 5 ? 5 : 3 + ballsExtra}`, maidens: 0, runs: 28 + _tick, wickets: 1 },
-      recentBalls: recentBallPool.slice(_tick, _tick + 9).concat(recentBallPool).slice(0, 9),
-      thisOver: ["1", "Wd", "1", "4", ".", "1"].slice(0, 3 + ballsExtra > 6 ? 6 : 3 + ballsExtra),
-      partnership: { runs: 89 + _tick, balls: 56 + ballsExtra },
-    };
-  }
-  return (await api.get(`/matches/${matchId}/live`)).data;
-}
-
-export async function getCommentary(matchId: string): Promise<Commentary[]> {
-  if (MOCK_MODE) {
-    await delay(150);
-    return [
-      { over: "18.3", ball: "1", text: "M. Pathirana to F. du Plessis, 1 run, pushed to mid-on for a quick single.", scoreAfter: "162/4" },
-      { over: "18.2", ball: ".", text: "M. Pathirana to F. du Plessis, no run, beaten outside off!", scoreAfter: "161/4" },
-      { over: "18.1", ball: "4", text: "M. Pathirana to F. du Plessis, FOUR! Beautifully driven through covers.", scoreAfter: "161/4" },
-      { over: "17.6", ball: "1", text: "T. Deshpande to V. Kohli, 1 run to long-on.", scoreAfter: "157/4" },
-      { over: "17.5", ball: "6", text: "T. Deshpande to V. Kohli, SIX! Massive hit over deep mid-wicket!", scoreAfter: "156/4" },
-      { over: "17.4", ball: ".", text: "T. Deshpande to V. Kohli, dot ball, defended.", scoreAfter: "150/4" },
-      { over: "17.3", ball: "2", text: "T. Deshpande to F. du Plessis, 2 runs, cleverly placed.", scoreAfter: "150/4" },
-    ];
-    void matchId;
-  }
-  return (await api.get(`/matches/${matchId}/commentary`)).data;
-}
-
-export async function getNews(): Promise<NewsItem[]> {
-  if (MOCK_MODE) { await delay(150); return NEWS; }
-  return (await api.get("/news")).data;
-}
-
-export async function getVideos(): Promise<VideoItem[]> {
-  if (MOCK_MODE) { await delay(100); return VIDEOS; }
-  return (await api.get("/videos")).data;
+  await delay(100);
+  return TEAMS.find((t) => t.id === teamId);
 }
 
 export async function getAllPlayers(): Promise<Player[]> {
-  if (MOCK_MODE) { await delay(150); return PLAYERS; }
-  return (await api.get("/players")).data;
+  await delay(100);
+  return PLAYERS;
 }
+
+// Matches list: try live API, fall back to mock
+export async function getMatches(): Promise<Match[]> {
+  if (USE_LIVE_API) {
+    try {
+      const { data } = await api.get("/live-matches");
+      if (data?.matches?.length) return data.matches as Match[];
+    } catch (e) {
+      console.warn("live-matches failed, using mock", e);
+    }
+  }
+  await delay(100);
+  return MATCHES;
+}
+
+export async function getMatchById(matchId: string): Promise<Match | undefined> {
+  if (USE_LIVE_API && !matchId.startsWith("m")) {
+    try {
+      const { data } = await api.get(`/match/${matchId}`);
+      if (data && !data.error) return data as Match;
+    } catch (e) {
+      console.warn("match by id failed, using mock", e);
+    }
+  }
+  await delay(80);
+  return MATCHES.find((m) => m.id === matchId);
+}
+
+export async function getLiveMatch(matchId: string): Promise<LiveData> {
+  if (USE_LIVE_API && !matchId.startsWith("m")) {
+    try {
+      const { data } = await api.get(`/live/${matchId}`);
+      if (data && !data.error) return data as LiveData;
+    } catch (e) {
+      console.warn("live match failed, using mock", e);
+    }
+  }
+  // Mock fallback (with simulated tick)
+  await delay(150);
+  _tick = (_tick + 1) % 6;
+  const baseRuns = 162 + Math.floor(_tick / 2);
+  const ballsExtra = _tick;
+  const recentBallPool = ["1", "Wd", "1", "4", ".", "1", "1b", "2", ".", "4", "6", "0"];
+  return {
+    matchId,
+    battingTeam: "RCB",
+    bowlingTeam: "CSK",
+    score: { runs: baseRuns, wickets: 4, overs: `18.${3 + ballsExtra > 5 ? 5 : 3 + ballsExtra}` },
+    target: 159,
+    required: `RCB need ${Math.max(0, 17 - _tick)} runs in ${Math.max(1, 9 - ballsExtra)} balls`,
+    currentBatters: [
+      { name: "V. Kohli", runs: 67 + _tick, balls: 43 + ballsExtra, sr: 155.81, onStrike: true },
+      { name: "F. du Plessis", runs: 45, balls: 28, sr: 160.71, onStrike: false },
+    ],
+    currentBowler: { name: "M. Pathirana", overs: `3.${3 + ballsExtra > 5 ? 5 : 3 + ballsExtra}`, maidens: 0, runs: 28 + _tick, wickets: 1 },
+    recentBalls: recentBallPool.slice(_tick, _tick + 9).concat(recentBallPool).slice(0, 9),
+    thisOver: ["1", "Wd", "1", "4", ".", "1"].slice(0, 3 + ballsExtra > 6 ? 6 : 3 + ballsExtra),
+    partnership: { runs: 89 + _tick, balls: 56 + ballsExtra },
+  };
+}
+
+let _tick = 0;
+
+export async function getCommentary(matchId: string): Promise<Commentary[]> {
+  if (USE_LIVE_API && !matchId.startsWith("m")) {
+    try {
+      const { data } = await api.get(`/commentary/${matchId}`);
+      if (data?.commentary?.length) return data.commentary as Commentary[];
+    } catch (e) {
+      console.warn("commentary failed, using mock", e);
+    }
+  }
+  await delay(120);
+  return [
+    { over: "18.3", ball: "1", text: "M. Pathirana to F. du Plessis, 1 run, pushed to mid-on for a quick single.", scoreAfter: "162/4" },
+    { over: "18.2", ball: ".", text: "M. Pathirana to F. du Plessis, no run, beaten outside off!", scoreAfter: "161/4" },
+    { over: "18.1", ball: "4", text: "M. Pathirana to F. du Plessis, FOUR! Beautifully driven through covers.", scoreAfter: "161/4" },
+    { over: "17.6", ball: "1", text: "T. Deshpande to V. Kohli, 1 run to long-on.", scoreAfter: "157/4" },
+    { over: "17.5", ball: "6", text: "T. Deshpande to V. Kohli, SIX! Massive hit over deep mid-wicket!", scoreAfter: "156/4" },
+    { over: "17.4", ball: ".", text: "T. Deshpande to V. Kohli, dot ball, defended.", scoreAfter: "150/4" },
+    { over: "17.3", ball: "2", text: "T. Deshpande to F. du Plessis, 2 runs, cleverly placed.", scoreAfter: "150/4" },
+  ];
+}
+
+export async function getNews(): Promise<NewsItem[]> {
+  if (USE_LIVE_API) {
+    try {
+      const { data } = await api.get("/news");
+      if (data?.news?.length) return data.news as NewsItem[];
+    } catch (e) {
+      console.warn("news failed, using mock", e);
+    }
+  }
+  await delay(120);
+  return NEWS;
+}
+
+export async function getVideos(): Promise<VideoItem[]> {
+  await delay(80);
+  return VIDEOS;
+}
+
