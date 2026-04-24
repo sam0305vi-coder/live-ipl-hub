@@ -9,38 +9,208 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VideosRouteImport } from './routes/videos'
+import { Route as TeamsRouteImport } from './routes/teams'
+import { Route as StatsRouteImport } from './routes/stats'
+import { Route as PointsTableRouteImport } from './routes/points-table'
+import { Route as PlayersRouteImport } from './routes/players'
+import { Route as NewsRouteImport } from './routes/news'
+import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TeamTeamIdRouteImport } from './routes/team.$teamId'
+import { Route as LiveMatchIdRouteImport } from './routes/live.$matchId'
 
+const VideosRoute = VideosRouteImport.update({
+  id: '/videos',
+  path: '/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamsRoute = TeamsRouteImport.update({
+  id: '/teams',
+  path: '/teams',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatsRoute = StatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PointsTableRoute = PointsTableRouteImport.update({
+  id: '/points-table',
+  path: '/points-table',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlayersRoute = PlayersRouteImport.update({
+  id: '/players',
+  path: '/players',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatchesRoute = MatchesRouteImport.update({
+  id: '/matches',
+  path: '/matches',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeamTeamIdRoute = TeamTeamIdRouteImport.update({
+  id: '/team/$teamId',
+  path: '/team/$teamId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LiveMatchIdRoute = LiveMatchIdRouteImport.update({
+  id: '/live/$matchId',
+  path: '/live/$matchId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/matches': typeof MatchesRoute
+  '/news': typeof NewsRoute
+  '/players': typeof PlayersRoute
+  '/points-table': typeof PointsTableRoute
+  '/stats': typeof StatsRoute
+  '/teams': typeof TeamsRoute
+  '/videos': typeof VideosRoute
+  '/live/$matchId': typeof LiveMatchIdRoute
+  '/team/$teamId': typeof TeamTeamIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/matches': typeof MatchesRoute
+  '/news': typeof NewsRoute
+  '/players': typeof PlayersRoute
+  '/points-table': typeof PointsTableRoute
+  '/stats': typeof StatsRoute
+  '/teams': typeof TeamsRoute
+  '/videos': typeof VideosRoute
+  '/live/$matchId': typeof LiveMatchIdRoute
+  '/team/$teamId': typeof TeamTeamIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/matches': typeof MatchesRoute
+  '/news': typeof NewsRoute
+  '/players': typeof PlayersRoute
+  '/points-table': typeof PointsTableRoute
+  '/stats': typeof StatsRoute
+  '/teams': typeof TeamsRoute
+  '/videos': typeof VideosRoute
+  '/live/$matchId': typeof LiveMatchIdRoute
+  '/team/$teamId': typeof TeamTeamIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/matches'
+    | '/news'
+    | '/players'
+    | '/points-table'
+    | '/stats'
+    | '/teams'
+    | '/videos'
+    | '/live/$matchId'
+    | '/team/$teamId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/matches'
+    | '/news'
+    | '/players'
+    | '/points-table'
+    | '/stats'
+    | '/teams'
+    | '/videos'
+    | '/live/$matchId'
+    | '/team/$teamId'
+  id:
+    | '__root__'
+    | '/'
+    | '/matches'
+    | '/news'
+    | '/players'
+    | '/points-table'
+    | '/stats'
+    | '/teams'
+    | '/videos'
+    | '/live/$matchId'
+    | '/team/$teamId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MatchesRoute: typeof MatchesRoute
+  NewsRoute: typeof NewsRoute
+  PlayersRoute: typeof PlayersRoute
+  PointsTableRoute: typeof PointsTableRoute
+  StatsRoute: typeof StatsRoute
+  TeamsRoute: typeof TeamsRoute
+  VideosRoute: typeof VideosRoute
+  LiveMatchIdRoute: typeof LiveMatchIdRoute
+  TeamTeamIdRoute: typeof TeamTeamIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/videos': {
+      id: '/videos'
+      path: '/videos'
+      fullPath: '/videos'
+      preLoaderRoute: typeof VideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teams': {
+      id: '/teams'
+      path: '/teams'
+      fullPath: '/teams'
+      preLoaderRoute: typeof TeamsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stats': {
+      id: '/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof StatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/points-table': {
+      id: '/points-table'
+      path: '/points-table'
+      fullPath: '/points-table'
+      preLoaderRoute: typeof PointsTableRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/players': {
+      id: '/players'
+      path: '/players'
+      fullPath: '/players'
+      preLoaderRoute: typeof PlayersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/matches': {
+      id: '/matches'
+      path: '/matches'
+      fullPath: '/matches'
+      preLoaderRoute: typeof MatchesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +218,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/team/$teamId': {
+      id: '/team/$teamId'
+      path: '/team/$teamId'
+      fullPath: '/team/$teamId'
+      preLoaderRoute: typeof TeamTeamIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/live/$matchId': {
+      id: '/live/$matchId'
+      path: '/live/$matchId'
+      fullPath: '/live/$matchId'
+      preLoaderRoute: typeof LiveMatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MatchesRoute: MatchesRoute,
+  NewsRoute: NewsRoute,
+  PlayersRoute: PlayersRoute,
+  PointsTableRoute: PointsTableRoute,
+  StatsRoute: StatsRoute,
+  TeamsRoute: TeamsRoute,
+  VideosRoute: VideosRoute,
+  LiveMatchIdRoute: LiveMatchIdRoute,
+  TeamTeamIdRoute: TeamTeamIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
