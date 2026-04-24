@@ -18,7 +18,6 @@ export const Route = createFileRoute("/api/live-matches")({
       GET: async (_ctx: any) => {
         try {
           const data = await cb("/matches/v1/live");
-          // Normalize to a flat list
           const matches: any[] = [];
           for (const tm of data.typeMatches ?? []) {
             for (const sm of tm.seriesMatches ?? []) {
@@ -53,4 +52,4 @@ export const Route = createFileRoute("/api/live-matches")({
       },
     },
   },
-});
+} as any);
